@@ -1,86 +1,113 @@
 const fs = require('fs');
 const path = require('path');
-const { malvin } = require('../malvin');
 const config = require('../settings');
+const { malvin } = require('../malvin');
 
-// Helper to convert "true"/"false" strings to actual boolean
-function convertToBool(text, trueValue = 'true') {
-    return text === trueValue;
+function updateEnvVariable(key, value) {
+    const envPath = path.join(__dirname, "../.env");
+    let env = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+    const regex = new RegExp(`^${key}=.*`, "m");
+
+    if (regex.test(env)) {
+        env = env.replace(regex, `${key}=${value}`);
+    } else {
+        env += `\n${key}=${value}`;
+    }
+
+    fs.writeFileSync(envPath, env);
+
+    // Reload dotenv and config
+    require('dotenv').config({ path: envPath });
+
+    // Clear config cache
+    delete require.cache[require.resolve('../config')];
+    Object.assign(config, require('../config'));  // Reload
 }
 
-// Convert config values to booleans where applicable
-const booleanConfigKeys = [
-    'AUTO_STATUS_SEEN', 'AUTO_STATUS_REPLY', 'AUTO_STATUS_REACT',
-    'AUTO_REPLY', 'AUTO_STICKER', 'CUSTOM_REACT', 'AUTO_REACT',
-    'DELETE_LINKS', 'ANTI_LINK', 'ANTI_BAD_WORD', 'AUTO_TYPING',
-    'AUTO_RECORDING', 'ALWAYS_ONLINE', 'PUBLIC_MODE', 'READ_MESSAGE'
-];
-
-function generateSettingsList() {
-    const settingsList = [
-        { name: 'status view', key: 'AUTO_STATUS_SEEN', emoji: '👁️' },
-        { name: 'status reply', key: 'AUTO_STATUS_REPLY', emoji: '💬' },
-        { name: 'status react', key: 'AUTO_STATUS_REACT', emoji: '🤩' },
-        { name: 'status reply msg', key: 'AUTO_STATUS_MSG', emoji: '💭', isText: true },
-        { name: 'auto reply', key: 'AUTO_REPLY', emoji: '↩️' },
-        { name: 'auto sticker', key: 'AUTO_STICKER', emoji: '🖼️' },
-        { name: 'custom reacts', key: 'CUSTOM_REACT', emoji: '👍' },
-        { name: 'auto react', key: 'AUTO_REACT', emoji: '💥' },
-        { name: 'delete links', key: 'DELETE_LINKS', emoji: '🔗' },
-        { name: 'anti-link', key: 'ANTI_LINK', emoji: '🚫' },
-        { name: 'anti-bad words', key: 'ANTI_BAD_WORD', emoji: '🛑' },
-        { name: 'auto typing', key: 'AUTO_TYPING', emoji: '⌨️' },
-        { name: 'auto recording', key: 'AUTO_RECORDING', emoji: '🎙️' },
-        { name: 'always online', key: 'ALWAYS_ONLINE', emoji: '🌐' },
-        { name: 'public mode', key: 'PUBLIC_MODE', emoji: '🌍' },
-        { name: 'read message', key: 'READ_MESSAGE', emoji: '📖' },
-    ];
-
-    return settingsList.map(s => {
-        if (s.isText) {
-            return `├ ${s.emoji} *${s.name}*: ${config[s.key] || 'not set'}`;
-        }
-        const value = convertToBool(config[s.key]);
-        return `├ ${s.emoji} *${s.name}*: ${value ? '✅ enabled' : '❌ disabled'}`;
-    }).join('\n');
+function isEnabled(value) {
+    return value && value.toString().toLowerCase() === "true";
 }
 
 malvin({
-    pattern: 'env',
-    alias: ['setting', 'allvar'],
-    desc: 'view bot settings ⚙️',
-    category: 'main',
-    react: '⚙️',
+    pattern: "env",
+    alias: ["config", "settings"],
+    desc: "Bot config control panel via reply menu (ENV based)",
+    category: "owner",
+    react: "⚙️",
     filename: __filename
-}, async (malvin, mek, m, { from, reply }) => {
-    try {
-        await malvin.sendMessage(from, { react: { text: '⏳', key: m.key } });
+}, 
+async (malvin, mek, m, { from, reply, isOwner }) => {
+    if (!isOwner) return reply("ᴄᴏᴍᴍᴀɴᴅ ʀᴇsᴇʀᴠᴇᴅ ғᴏʀ ᴏᴡɴᴇʀ ᴀɴᴅ ᴍʏ ᴄʀᴇᴀᴛᴏʀ ᴀʟᴏɴᴇ");
 
-        const settingsMessage = `
-╭───[ *ᴇɴᴠ sᴇᴛᴛɪɴɢs* ]───
-├ *ʙᴏᴛ*: ${config.BOT_NAME || 'ᴍᴇʀᴄᴇᴅᴇs'} 🤖
-├ *ᴘʀᴇғɪx*: ${config.PREFIX || '.'} 🛠️
-├ *ᴍᴏᴅᴇ*: ${config.MODE || 'private'} 🔒
-├ *sᴇᴛᴛɪɴɢs*: ⚙️
-${generateSettingsList()}
-╰───[ *ᴍᴀʟᴠɪɴ-xᴅ* ]───
-> *ᴍᴀᴅᴇ ʙʏ ᴍᴀʀɪsᴇʟ*`;
+    const menu = `┏─〔 *ᴍᴇʀᴄᴇᴅᴇs* 〕──⊷
+┇๏ *1. ᴀᴜᴛᴏ ғᴇᴀᴛᴜʀᴇs*
+┇๏ 1.2 - ᴀᴜᴛᴏ_ʀᴇᴀᴄᴛ (${isEnabled(config.AUTO_REACT) ? "✅" : "❌"})
+┗──────────────⊷
+┏──────────────⊷
+┇๏ *2. sᴇᴄᴜʀɪᴛʏ*
+┇๏ 2.1 - ᴀɴᴛɪ_ʟɪɴᴋ (${isEnabled(config.ANTI_LINK) ? "✅" : "❌"})
+┇๏ 2.2 - ᴀɴᴛɪ_ʙᴀᴅ (${isEnabled(config.ANTI_BAD) ? "✅" : "❌"})
+┇๏ 2.3 - �ᴇʟᴇᴛᴇ_ʟɪɴᴋs (${isEnabled(config.DELETE_LINKS) ? "✅" : "❌"})
+┗──────────────⊷
+┏──────────────⊷
+┇๏ *3. sᴛᴀᴛᴜs sʏsᴛᴇᴍ*
+┇๏ 3.1 - ᴀᴜᴛᴏ_sᴛᴀᴛᴜs_sᴇᴇɴ (${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"})
+┇๏ 3.2 - ᴀᴜᴛᴏ_sᴛᴀᴛᴜs_ʀᴇᴘʟʏ (${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"})
+┇๏ 3.3 - ᴀᴜᴛᴏ_sᴛᴀᴛᴜs_ʀᴇᴀᴄᴛ (${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"})
+┗──────────────⊷
+┏──────────────⊷
+┇๏ *4. ᴄᴏʀᴇ*
+┇๏ 4.1 - ᴀʟᴡᴀʏs_ᴏɴʟɪɴᴇ (${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"})
+┇๏ 4.2 - ʀᴇᴀᴅ_ᴍᴇssᴀɢᴇ (${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"})
+┇๏ 4.3 - ʀᴇᴀᴅ_ᴄᴍᴅ (${isEnabled(config.READ_CMD) ? "✅" : "❌"})
+┇๏ 4.4 - �ᴜʙʟɪᴄ_ᴍᴏᴅᴇ (${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"})
+┗──────────────⊷
+┏──────────────⊷
+┇๏ *5. ᴛʏᴘɪɴɢ/ʀᴇᴄᴏʀᴅɪɴɢ*
+┇๏ 5.1 - ᴀᴜᴛᴏ_ᴛʏᴘɪɴɢ (${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"})
+┇๏ 5.2 - ᴀᴜᴛᴏ_ʀᴇᴄᴏʀᴅɪɴɢ (${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"})
+┗──────────────⊷
+_ʀᴇᴘʟʏ ᴡɪᴛʜ: 1.1, 2.2, ᴇᴛᴄ ᴛᴏ ᴛᴏɢɢʟᴇ ᴏɴ/ᴏғғ_
+`;
 
-        const imageUrl = config.MENU_IMAGE_URL || 'https://url.bwmxmd.online/Adams.0dhfcjpi.jpeg';
+    const sent = await malvin.sendMessage(from, {
+        caption: menu,
+        image: { url: "https://files.catbox.moe/t6zgqv.jpg" }
+    }, { quoted: mek });
 
-        await malvin.sendMessage(from, {
-            image: { url: imageUrl },
-            caption: settingsMessage,
-            contextInfo: {
-                mentionedJid: [m.sender]
-            }
-        }, { quoted: mek });
+    const messageID = sent.key.id;
 
-        await malvin.sendMessage(from, { react: { text: '✅', key: m.key } });
+    const toggleSetting = (key) => {
+        const current = isEnabled(config[key]);
+        updateEnvVariable(key, current ? "false" : "true");
+        return `✅ *${key}* ɪs ɴᴏᴡ sᴇᴛ ᴛᴏ: *${!current ? "ON" : "OFF"}*`;
+    };
 
-    } catch (e) {
-        console.error('❌ env error:', e);
-        await reply('❌ error fetching settings');
-        await malvin.sendMessage(from, { react: { text: '❌', key: m.key } });
-    }
+    const handler = async (msgData) => {
+        const msg = msgData.messages[0];
+        const quotedId = msg?.message?.extendedTextMessage?.contextInfo?.stanzaId;
+
+        if (quotedId !== messageID) return;
+
+        const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+
+        const map = {
+            "1.2": "AUTO_REACT",
+            "2.1": "ANTI_LINK", "2.2": "ANTI_BAD", "2.3": "DELETE_LINKS",
+            "3.1": "AUTO_STATUS_SEEN", "3.2": "AUTO_STATUS_REPLY", "3.3": "AUTO_STATUS_REACT",
+            "4.1": "ALWAYS_ONLINE", "4.2": "READ_MESSAGE", "4.3": "READ_CMD", "4.4": "PUBLIC_MODE",
+            "5.1": "AUTO_TYPING", "5.2": "AUTO_RECORDING"
+        };
+
+        const key = map[text];
+
+        if (!key) return malvin.sendMessage(from, { text: "ʀᴇᴘʟʏ ᴡɪᴛʜ ᴀɴ ᴀᴠᴀɪʟᴀʙʟᴇ ɴᴜᴍʙᴇʀ." }, { quoted: msg });
+
+        const res = toggleSetting(key);
+        await malvin.sendMessage(from, { text: res }, { quoted: msg });
+        malvin.ev.off("messages.upsert", handler);
+    };
+
+    malvin.ev.on("messages.upsert", handler);
+    setTimeout(() => malvin.ev.off("messages.upsert", handler), 60_000);
 });
