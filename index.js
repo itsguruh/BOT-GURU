@@ -1117,13 +1117,13 @@ if (!isReact && senderNumber === botNumber) {
 app.use(express.static(path.join(__dirname, "lib")));
 
 app.get("/", (req, res) => {
-  res.redirect("/malvin.html");
+  res.redirect("/marisel.html");
 });
 app.listen(port, () =>
   console.log(chalk.cyan(`
-╭──[ welcome ]─
-│🤗 hi
-╰─────────`))
+╭──[ hello user ]─
+│🤗 hi your bot is live 
+╰──────────────`))
 );
 
 setTimeout(() => {
