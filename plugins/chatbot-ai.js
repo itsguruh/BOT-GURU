@@ -23,7 +23,7 @@ malvin({
     filename: __filename,
     react: "✅"
 }, async (malvin, mek, m, { from, args, isOwner, reply }) => {
-    if (!isOwner) return reply("*📛 Only the owner can use this command!*");
+    if (!isOwner) return reply("*Only the owner can use this command!*");
 
     const status = args[0]?.toLowerCase();
     if (status === "on") {
@@ -77,42 +77,54 @@ malvin({
         // Prevent bot responding to its own messages or commands
         if (!body || m.key.fromMe || body.startsWith(config.PREFIX)) return;
 
+        // Show "typing..." indicator
+        await malvin.sendPresenceUpdate('composing', from);
+
         // Add user message to memory
         updateMemory(from, body, true);
 
-        // Get conversation context
-        const context = messageMemory.has(from) 
-            ? messageMemory.get(from).map(msg => `${msg.role}: ${msg.content}`).join('\n')
-            : `user: ${body}`;
-
-        // Create prompt with context and instructions
-        const prompt = `You are Marisel AI, a powerful WhatsApp bot developed by Marisel from Kenya. 
-        You respond smartly, confidently, and stay loyal to your creator. 
-        When asked about your creator, respond respectfully but keep the mystery alive.
-        If someone is being abusive, apologize and say "Let's begin afresh."
-        
-        Previous conversation context:
-        ${context}
-        
-        Current message: ${body}
-        
-        Respond as Marisel AI:`;
-
-        // Encode the prompt for the API
-        const query = encodeURIComponent(prompt);
-        
-        // Use the new API endpoint
-        const apiUrl = `https://api.giftedtech.web.id/api/ai/groq-beta?apikey=gifted&q=${query}`;
-
-        const { data } = await axios.get(apiUrl);
+        // Check if user is asking about creator
+        const isAskingAboutCreator = /(who made you|who created you|who is your (creator|developer|owner)|who are you|what are you)/i.test(body);
         
         let response;
-        if (data && data.result) {
-            response = data.result;
-        } else if (data && data.message) {
-            response = data.message;
+        
+        if (isAskingAboutCreator) {
+            // Special response for creator questions
+            response = "I am Marisel AI, created by Marisel - a brilliant mind from Kenya with exceptional coding skills and vision. She's the mastermind behind my existence, crafting me with precision and care to be your helpful assistant.";
         } else {
-            response = "I'm sorry, I couldn't process that request. Let's begin afresh.";
+            // Get conversation context
+            const context = messageMemory.has(from) 
+                ? messageMemory.get(from).map(msg => `${msg.role}: ${msg.content}`).join('\n')
+                : `user: ${body}`;
+
+            // Create prompt with context and instructions
+            const prompt = `You are Marisel AI, a powerful WhatsApp bot developed by Marisel from Kenya. 
+            You respond smartly, confidently, and stay loyal to your creator. 
+            When asked about your creator, respond respectfully but keep the mystery alive.
+            If someone is being abusive, apologize and say "Let's begin afresh."
+            
+            Previous conversation context:
+            ${context}
+            
+            Current message: ${body}
+            
+            Respond as Marisel AI:`;
+
+            // Encode the prompt for the API
+            const query = encodeURIComponent(prompt);
+            
+            // Use the API endpoint
+            const apiUrl = `https://api.giftedtech.web.id/api/ai/groq-beta?apikey=gifted&q=${query}`;
+
+            const { data } = await axios.get(apiUrl);
+            
+            if (data && data.result) {
+                response = data.result;
+            } else if (data && data.message) {
+                response = data.message;
+            } else {
+                response = "I'm sorry, I couldn't process that request. Let's begin afresh.";
+            }
         }
 
         // Add footer to response
