@@ -20,25 +20,31 @@ malvin({
     // Add a reaction to indicate processing
     await malvin.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    // Prepare the API URL
-    const apiUrl = `https://api.fgmods.xyz/api/downloader/igdl?url=${encodeURIComponent(igUrl)}&apikey=E8sfLg9l`;
+    // Prepare the API URL with the new endpoint
+    const apiUrl = `https://apis.davidcyriltech.my.id/instagram?url=${encodeURIComponent(igUrl)}`;
 
     // Call the API using GET
     const response = await axios.get(apiUrl);
 
     // Check if the API response is valid
-    if (!response.data || !response.data.status || !response.data.result) {
+    if (!response.data || response.data.status !== 200 || !response.data.data) {
       return reply('❌ Unable to fetch the post. Please check the URL and try again.');
     }
 
-    // Extract the post details
-    const { url, caption, username, like, comment, isVideo } = response.data.result;
+    // Extract the post details from the new API response format
+    const postData = response.data.data;
+    const username = postData.username || "unknown";
+    const caption = postData.caption || "No caption";
+    const mediaUrls = postData.media || [];
+    const isVideo = postData.type === "video";
+    const likeCount = postData.like_count || 0;
+    const commentCount = postData.comment_count || 0;
 
     // Inform the user that the post is being downloaded
     await reply(`📥 *Downloading Instagram post by @${username}... Please wait.*`);
 
     // Download and send each media item
-    for (const mediaUrl of url) {
+    for (const mediaUrl of mediaUrls) {
       const mediaResponse = await axios.get(mediaUrl, { responseType: 'arraybuffer' });
       if (!mediaResponse.data) {
         return reply('❌ Failed to download the media. Please try again later.');
@@ -52,9 +58,9 @@ malvin({
           video: mediaBuffer,
           caption: `📥 *Instagram Post*\n\n` +
             `👤 *Username*: @${username}\n` +
-            `❤️ *Likes*: ${like}\n` +
-            `💬 *Comments*: ${comment}\n` +
-            `📝 *Caption*: ${caption || "No caption"}\n\n` +
+            `❤️ *Likes*: ${likeCount}\n` +
+            `💬 *Comments*: ${commentCount}\n` +
+            `📝 *Caption*: ${caption}\n\n` +
             `> ᴍᴀᴅᴇ ʙʏ ᴍᴀʀɪsᴇʟ`,
           contextInfo: {
             mentionedJid: [m.sender],
@@ -73,9 +79,9 @@ malvin({
           image: mediaBuffer,
           caption: `📥 *Instagram Post*\n\n` +
             `👤 *Username*: @${username}\n` +
-            `❤️ *Likes*: ${like}\n` +
-            `💬 *Comments*: ${comment}\n` +
-            `📝 *Caption*: ${caption || "No caption"}\n\n` +
+            `❤️ *Likes*: ${likeCount}\n` +
+            `💬 *Comments*: ${commentCount}\n` +
+            `📝 *Caption*: ${caption}\n\n` +
             `> ᴍᴀᴅᴇ ʙʏ ᴍᴀʀɪsᴇʟ`,
           contextInfo: {
             mentionedJid: [m.sender],
@@ -101,9 +107,8 @@ malvin({
     await malvin.sendMessage(from, { react: { text: '❌', key: m.key } });
   }
 });
+
 // VIDEO SECTION
-
-
 malvin({
   pattern: "igvid",
   alias: ["igvideo","ig","instagram", "igdl"],
@@ -123,52 +128,63 @@ malvin({
     // Add a reaction to indicate processing
     await malvin.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    // Prepare the API URL
-    const apiUrl = `https://api.nexoracle.com/downloader/aio2?apikey=free_key@maher_apis&url=${encodeURIComponent(igUrl)}`;
+    // Prepare the API URL with the new endpoint
+    const apiUrl = `https://apis.davidcyriltech.my.id/instagram?url=${encodeURIComponent(igUrl)}`;
 
     // Call the API using GET
     const response = await axios.get(apiUrl);
 
     // Check if the API response is valid
-    if (!response.data || response.data.status !== 200 || !response.data.result) {
+    if (!response.data || response.data.status !== 200 || !response.data.data) {
       return reply('❌ Unable to fetch the video. Please check the URL and try again.');
     }
 
-    // Extract the video details
-    const { title, low, high } = response.data.result;
+    // Extract the video details from the new API response format
+    const postData = response.data.data;
+    const username = postData.username || "unknown";
+    const caption = postData.caption || "No caption";
+    const mediaUrls = postData.media || [];
+    const isVideo = postData.type === "video";
+    const likeCount = postData.like_count || 0;
+    const commentCount = postData.comment_count || 0;
 
-    // Inform the user that the video is being downloaded
-    await reply(`📥 *Downloading ${title || "Instagram video"}... Please wait.*`);
-
-    // Choose the highest quality video URL
-    const videoUrl = high || low;
-
-    // Download the video
-    const videoResponse = await axios.get(videoUrl, { responseType: 'arraybuffer' });
-    if (!videoResponse.data) {
-      return reply('❌ Failed to download the video. Please try again later.');
+    if (!isVideo) {
+      return reply('❌ The provided URL is not a video. Use .igimagedl for images.');
     }
 
-    // Prepare the video buffer
-    const videoBuffer = Buffer.from(videoResponse.data, 'binary');
+    // Inform the user that the video is being downloaded
+    await reply(`📥 *Downloading Instagram video by @${username}... Please wait.*`);
 
-    // Send the video
-    await malvin.sendMessage(from, {
-      video: videoBuffer,
-      caption: `📥 *Instagram Video*\n\n` +
-        `🔖 *Title*: ${title || "No title"}\n\n` +
-        `> ᴍᴀᴅᴇ ʙʏ ᴍᴀʀɪsᴇʟ`,
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363299029326322@newsletter',
-          newsletterName: '𝖒𝖆𝖗𝖎𝖘𝖊𝖑',
-          serverMessageId: 143
-        }
+    // Download and send each video
+    for (const mediaUrl of mediaUrls) {
+      const videoResponse = await axios.get(mediaUrl, { responseType: 'arraybuffer' });
+      if (!videoResponse.data) {
+        return reply('❌ Failed to download the video. Please try again later.');
       }
-    }, { quoted: mek });
+
+      const videoBuffer = Buffer.from(videoResponse.data, 'binary');
+
+      // Send the video
+      await malvin.sendMessage(from, {
+        video: videoBuffer,
+        caption: `📥 *Instagram Video*\n\n` +
+          `👤 *Username*: @${username}\n` +
+          `❤️ *Likes*: ${likeCount}\n` +
+          `💬 *Comments*: ${commentCount}\n` +
+          `📝 *Caption*: ${caption}\n\n` +
+          `> ᴍᴀᴅᴇ ʙʏ ᴍᴀʀɪsᴇʟ`,
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363299029326322@newsletter',
+            newsletterName: '𝖒𝖆𝖗𝖎𝖘𝖊𝖑',
+            serverMessageId: 143
+          }
+        }
+      }, { quoted: mek });
+    }
 
     // Add a reaction to indicate success
     await malvin.sendMessage(from, { react: { text: '✅', key: m.key } });
