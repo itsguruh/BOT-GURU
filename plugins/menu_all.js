@@ -77,14 +77,14 @@ malvin({
 
     let menu = `
 *┏────〘 ᴍᴇʀᴄᴇᴅᴇs 〙───⊷*
-*┃* ᴜꜱᴇʀ : @${sender.split("@")[0]}
-*┃* ʀᴜɴᴛɪᴍᴇ : ${uptime()}
-*┃* ᴍᴏᴅᴇ : *${config.MODE}*
-*┃* ᴘʀᴇғɪx : 「 ${config.PREFIX} 」
-*┃* ᴏᴡɴᴇʀ : ${config.OWNER_NAME}
-*┃* ᴘʟᴜɢɪɴꜱ : 『 ${commands.length} 』
-*┃* ᴅᴇᴠ : ᴍᴀʀɪsᴇʟ
-*┃* ᴠᴇʀꜱɪᴏɴ : 2.0.0
+*┃ ᴜꜱᴇʀ : @${sender.split("@")[0]}*
+*┃ ʀᴜɴᴛɪᴍᴇ : ${uptime()}*
+*┃ ᴍᴏᴅᴇ : ${config.MODE}*
+*┃ ᴘʀᴇғɪx : 「 ${config.PREFIX}」* 
+*┃ ᴏᴡɴᴇʀ : ${config.OWNER_NAME}*
+*┃ ᴘʟᴜɢɪɴꜱ : 『 ${commands.length} 』*
+*┃ ᴅᴇᴠ : ᴍᴀʀɪsᴇʟ*
+*┃ ᴠᴇʀꜱɪᴏɴ : 2.0.0*
 *┗──────────────⊷*`;
 
     // Group commands by category (improved logic)
@@ -100,11 +100,11 @@ malvin({
     // Add sorted categories with stylized text
     for (const cat of Object.keys(categories).sort()) {
       const emoji = emojiByCategory[cat] || '💫';
-      menu += `\n\n┏─『 ${emoji} ${toUpperStylized(cat)} ${toUpperStylized('Menu')} 』──⊷\n`;
+      menu += `\n\n*┏─『 ${emoji} ${toUpperStylized(cat)} ${toUpperStylized('Menu')} 』──⊷*\n`;
       for (const cmd of categories[cat].sort()) {
-        menu += `│ ${prefix}${cmd}\n`;
+        menu += `*│ ${prefix}${cmd}*\n`;
       }
-      menu += `┗──────────────⊷`;
+      menu += `*┗──────────────⊷*`;
     }
 
     menu += `\n\n> ${config.DESCRIPTION || toUpperStylized('Explore the bot commands!')}`;
