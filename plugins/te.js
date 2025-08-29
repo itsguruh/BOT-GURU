@@ -5,16 +5,25 @@ const { runtime } = require('../lib/functions');
 const os = require('os');
 const { getPrefix } = require('../lib/prefix');
 
-// Fonction pour styliser les majuscules comme ʜɪ
-function toUpperStylized(str) {
-  const stylized = {
-    A: 'ᴀ', B: 'ʙ', C: 'ᴄ', D: 'ᴅ', E: 'ᴇ', F: 'ғ', G: 'ɢ', H: 'ʜ',
-    I: 'ɪ', J: 'ᴊ', K: 'ᴋ', L: 'ʟ', M: 'ᴍ', N: 'ɴ', O: 'ᴏ', P: 'ᴘ',
-    Q: 'ǫ', R: 'ʀ', S: 's', T: 'ᴛ', U: 'ᴜ', V: 'ᴠ', W: 'ᴡ', X: 'x',
-    Y: 'ʏ', Z: 'ᴢ'
-  };
-  return str.split('').map(c => stylized[c.toUpperCase()] || c).join('');
-}
+// Tiny caps mapping for lowercase letters (same as alive command)
+const tinyCapsMap = {
+  a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ғ', g: 'ɢ', h: 'ʜ', i: 'ɪ',
+  j: 'ᴊ', k: 'ᴋ', l: 'ʟ', m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ', q: 'q', r: 'ʀ',
+  s: 's', t: 'ᴛ', u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'x', y: 'ʏ', z: 'ᴢ'
+};
+
+// Function to convert string to tiny caps (same as alive command)
+const toTinyCaps = (str) => {
+  return str
+    .split('')
+    .map((char) => tinyCapsMap[char.toLowerCase()] || char)
+    .join('');
+};
+
+// Configuration constants
+const MENU_IMG = config.MENU_IMAGE_URL || 'https://url.bwmxmd.online/Adams.zjrmnw18.jpeg';
+const NEWSLETTER_JID = config.NEWSLETTER_JID || '120363299029326322@newsletter';
+const MENU_AUDIO = config.MENU_AUDIO_URL || 'https://files.catbox.moe/pjlpd7.mp3';
 
 // Normalisation des catégories
 const normalize = (str) => str.toLowerCase().replace(/\s+menu$/, '').trim();
@@ -60,8 +69,8 @@ function createMenuNavigation(categories, prefix) {
   
   for (const cat of Object.keys(categories).sort()) {
     const emoji = emojiByCategory[cat] || '💫';
-    const title = `${emoji} ${toUpperStylized(cat)}`;
-    const description = `${toUpperStylized(cat)} ${toUpperStylized('Menu')}`;
+    const title = `${emoji} ${toTinyCaps(cat)}`;
+    const description = `${toTinyCaps(cat)} ${toTinyCaps('Menu')}`;
     
     rows.push({
       title: title,
@@ -70,85 +79,72 @@ function createMenuNavigation(categories, prefix) {
     });
   }
   
+  // Add additional utility buttons like in alive command
+  rows.push(
+    {
+      title: "🔙 Back",
+      rowId: `${prefix}menu`,
+      description: "Return to main menu"
+    },
+    {
+      title: "🚀 Alive",
+      rowId: `${prefix}alive`,
+      description: "Check bot status"
+    },
+    {
+      title: "👑 Owner",
+      rowId: `${prefix}owner`,
+      description: "Contact bot owner"
+    }
+  );
+  
   sections.push({
     title: "Menu Navigation",
     rows: rows
   });
   
   return {
-    text: "MERCEDES BOT MENU",
+    text: toTinyCaps("mercedes bot menu"),
     footer: "Select a category to explore commands",
-    title: "MERCEDES BOT MENU",
+    title: toTinyCaps("mercedes bot menu"),
     buttonText: "Browse Categories",
     sections: sections
   };
 }
 
-// Function to create sub-menu for a specific category
-function createSubMenu(category, commands, prefix) {
-  const emoji = emojiByCategory[category] || '💫';
-  const categoryTitle = `${emoji} ${toUpperStylized(category)} ${toUpperStylized('Menu')}`;
-  
-  const rows = commands.map(cmd => ({
-    title: `${prefix}${cmd}`,
-    rowId: `${prefix}${cmd}`,
-    description: `Execute ${cmd} command`
-  }));
-  
-  // Add back button
-  rows.push({
-    title: "🔙 Back to Main Menu",
-    rowId: `${prefix}menu`,
-    description: "Return to main menu"
-  });
-  
-  return {
-    text: categoryTitle,
-    footer: "MERCEDES BOT",
-    title: categoryTitle,
-    buttonText: "Select a Command",
-    sections: [{
-      title: "Available Commands",
-      rows: rows
-    }]
-  };
-}
-
 malvin({
-  pattern: 'meu',
-  alias: ['allmeu'],
+  pattern: 'menu',
+  alias: ['allmenu', 'help', 'commands'],
   desc: 'Show all bot commands',
   category: 'menu',
-  react: '👌',
+  react: '📜',
   filename: __filename
-}, async (malvin, mek, m, { from, sender, reply }) => {
+}, async (malvin, mek, m, { from, sender, reply, pushname }) => {
   try {
     const prefix = getPrefix();
     const timezone = config.TIMEZONE || 'Africa/Nairobi';
     const time = moment().tz(timezone).format('HH:mm:ss');
     const date = moment().tz(timezone).format('dddd, DD MMMM YYYY');
 
-    const uptime = () => {
-      let sec = process.uptime();
-      let h = Math.floor(sec / 3600);
-      let m = Math.floor((sec % 3600) / 60);
-      let s = Math.floor(sec % 60);
-      return `${h}h ${m}m ${s}s`;
-    };
+    const uptime = runtime(process.uptime());
+    const usedRam = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+    const totalRam = (os.totalmem() / 1024 / 1024).toFixed(2);
 
     let menu = `
-*┏────〘 ᴍᴇʀᴄᴇᴅᴇs 〙───⊷*
-*┃* ᴜꜱᴇʀ : @${sender.split("@")[0]}
-*┃* ʀᴜɴᴛɪᴍᴇ : ${uptime()}
-*┃* ᴍᴏᴅᴇ : *${config.MODE}*
-*┃* ᴘʀᴇғɪx : 「 ${config.PREFIX} 」
-*┃* ᴏᴡɴᴇʀ : ${config.OWNER_NAME}
-*┃* ᴘʟᴜɢɪɴꜱ : 『 ${commands.length} 』
-*┃* ᴅᴇᴠ : ᴍᴀʀɪsᴇʟ
-*┃* ᴠᴇʀꜱɪᴏɴ : 2.0.0
-*┗──────────────⊷*`;
+*┏─〔 ${pushname || sender.split("@")[0]} 〕─⊷*
+*┇ ᴜᴘᴛɪᴍᴇ: ${uptime}*
+*┇ ʙᴏᴛ ɴᴀᴍᴇ: ${config.BOT_NAME}*
+*┇ ᴏᴡɴᴇʀ: ${config.OWNER_NAME}*
+*┇ ᴘʀᴇғɪx: 「 ${prefix} 」*
+*┇ ᴘʟᴜɢɪɴꜱ: 『 ${commands.length} 』*
+*┇ ᴍᴏᴅᴇ: ${config.MODE}*
+*┇ ᴠᴇʀꜱɪᴏɴ: 2.0.0*
+*┗──────────────⊷*
 
-    // Group commands by category (improved logic)
+${toTinyCaps('select a category below to explore commands')}
+`.trim();
+
+    // Group commands by category
     const categories = {};
     for (const cmd of commands) {
       if (cmd.category && !cmd.dontAdd && cmd.pattern) {
@@ -158,38 +154,26 @@ malvin({
       }
     }
 
-    // Add sorted categories with stylized text
-    for (const cat of Object.keys(categories).sort()) {
-      const emoji = emojiByCategory[cat] || '💫';
-      menu += `\n\n┏─『 ${emoji} ${toUpperStylized(cat)} ${toUpperStylized('Menu')} 』──⊷\n`;
-      for (const cmd of categories[cat].sort()) {
-        menu += `│ ${prefix}${cmd}\n`;
-      }
-      menu += `┗──────────────⊷`;
-    }
+    // Create menu navigation
+    const listMessage = createMenuNavigation(categories, prefix);
 
-    menu += `\n\n> ${config.DESCRIPTION || toUpperStylized('Explore the bot commands!')}`;
-
-    // Context info for image message
+    // Context info for image message (same style as alive command)
     const imageContextInfo = {
       mentionedJid: [sender],
       forwardingScore: 999,
       isForwarded: true,
       forwardedNewsletterMessageInfo: {
-        newsletterJid: config.NEWSLETTER_JID || '120363299029326322@newsletter',
-        newsletterName: config.OWNER_NAME || toUpperStylized('marisel'),
+        newsletterJid: NEWSLETTER_JID,
+        newsletterName: toTinyCaps(config.OWNER_NAME || 'marisel'),
         serverMessageId: 143
       }
     };
-
-    // Create menu navigation
-    const listMessage = createMenuNavigation(categories, prefix);
 
     // Send menu image with navigation buttons
     await malvin.sendMessage(
       from,
       {
-        image: { url: config.MENU_IMAGE_URL || 'https://url.bwmxmd.online/Adams.zjrmnw18.jpeg' },
+        image: { url: MENU_IMG },
         caption: menu,
         ...listMessage,
         contextInfo: imageContextInfo
@@ -197,13 +181,13 @@ malvin({
       { quoted: mek }
     );
 
-    // Send audio if configured
-    if (config.MENU_AUDIO_URL) {
+    // Send audio if configured (same as alive command)
+    if (MENU_AUDIO) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       await malvin.sendMessage(
         from,
         {
-          audio: { url: config.MENU_AUDIO_URL },
+          audio: { url: MENU_AUDIO },
           mimetype: 'audio/mp4',
           ptt: true,
           contextInfo: {
@@ -211,7 +195,8 @@ malvin({
             forwardingScore: 999,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-              newsletterName: config.OWNER_NAME || toUpperStylized('marisel'),
+              newsletterJid: NEWSLETTER_JID,
+              newsletterName: toTinyCaps(config.OWNER_NAME || 'marisel'),
               serverMessageId: 143
             }
           }
@@ -221,8 +206,14 @@ malvin({
     }
 
   } catch (e) {
-    console.error('Menu Error:', e.message);
-    await reply(`❌ ${toUpperStylized('Error')}: Failed to show menu. Try again.\n${toUpperStylized('Details')}: ${e.message}`);
+    console.error('❌ Menu Error:', e.message);
+    await malvin.sendMessage(from, { react: { text: "❌", key: mek.key } });
+    const errorMessage = toTinyCaps(`
+      An error occurred while processing the menu command.
+      Error Details: ${e.message}
+      Please report this issue or try again later.
+    `).trim();
+    return reply(errorMessage);
   }
 });
 
@@ -233,7 +224,7 @@ for (const category of Object.keys(emojiByCategory)) {
     desc: `Show ${category} commands`,
     category: 'menu',
     filename: __filename
-  }, async (malvin, mek, m, { from, sender, reply }) => {
+  }, async (malvin, mek, m, { from, sender, reply, pushname }) => {
     try {
       const prefix = getPrefix();
       
@@ -249,36 +240,55 @@ for (const category of Object.keys(emojiByCategory)) {
       
       // Check if category exists
       if (!categories[category]) {
-        await reply(`❌ ${toUpperStylized('Error')}: Category "${category}" not found.`);
+        await reply(`❌ ${toTinyCaps('Error')}: ${toTinyCaps('Category')} "${category}" ${toTinyCaps('not found')}.`);
         return;
       }
       
       const emoji = emojiByCategory[category] || '💫';
-      const categoryTitle = `${emoji} ${toUpperStylized(category)} ${toUpperStylized('Menu')}`;
+      const categoryTitle = `${emoji} ${toTinyCaps(category)} ${toTinyCaps('Menu')}`;
       
-      let subMenu = `*${categoryTitle}*\n\n`;
+      let subMenu = `
+*┏─〔 ${pushname || sender.split("@")[0]} 〕─⊷*
+*┇ ᴄᴀᴛᴇɢᴏʀʏ: ${toTinyCaps(category)}*
+*┇ ᴄᴏᴍᴍᴀɴᴅꜱ: ${categories[category].length}*
+*┗──────────────⊷*
+
+*${categoryTitle}*
+`.trim();
+
       for (const cmd of categories[category].sort()) {
-        subMenu += `• ${prefix}${cmd}\n`;
+        subMenu += `\n• ${prefix}${cmd}`;
       }
       
-      subMenu += `\n*Total Commands*: ${categories[category].length}`;
-      
-      // Create sub-menu navigation
-      const listMessage = createSubMenu(category, categories[category], prefix);
+      // Create back button
+      const buttons = [
+        {
+          buttonId: "back",
+          buttonText: { displayText: "🔙 ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴍᴇɴᴜ" },
+          type: 1
+        }
+      ];
       
       // Send sub-menu
       await malvin.sendMessage(
         from,
         {
           text: subMenu,
-          ...listMessage
+          buttons: buttons,
+          headerType: 1,
+          contextInfo: {
+            mentionedJid: [sender],
+            forwardingScore: 999,
+            isForwarded: true
+          }
         },
         { quoted: mek }
       );
       
     } catch (e) {
-      console.error('Sub-Menu Error:', e.message);
-      await reply(`❌ ${toUpperStylized('Error')}: Failed to show ${category} menu. Try again.`);
+      console.error('❌ Sub-Menu Error:', e.message);
+      await malvin.sendMessage(from, { react: { text: "❌", key: mek.key } });
+      await reply(`❌ ${toTinyCaps('Error')}: ${toTinyCaps('Failed to show')} ${category} ${toTinyCaps('menu')}. ${toTinyCaps('Try again')}.`);
     }
   });
 }
@@ -295,6 +305,27 @@ malvin({
     if (mek.message?.buttonsResponseMessage) {
       const selectedId = mek.message.buttonsResponseMessage.selectedButtonId;
       
+      if (selectedId === "back") {
+        // Simulate the menu command
+        const simulatedMessage = {
+          ...mek,
+          body: `${prefix}menu`
+        };
+        // Find and execute the menu handler
+        for (const handler of malvin.handlers) {
+          if (handler.pattern === 'menu') {
+            await handler.func(malvin, simulatedMessage, m, {
+              from: from,
+              sender: mek.key.participant || from,
+              pushname: mek.pushName || "User",
+              reply: (text) => malvin.sendMessage(from, { text: text }, { quoted: mek })
+            });
+            break;
+          }
+        }
+        return;
+      }
+      
       if (selectedId) {
         // Handle menu navigation
         if (selectedId.endsWith('-menu')) {
@@ -309,6 +340,7 @@ malvin({
               await handler.func(malvin, simulatedMessage, m, {
                 from: from,
                 sender: mek.key.participant || from,
+                pushname: mek.pushName || "User",
                 reply: (text) => malvin.sendMessage(from, { text: text }, { quoted: mek })
               });
               break;
@@ -328,6 +360,7 @@ malvin({
               await handler.func(malvin, mek, m, {
                 from: from,
                 sender: mek.key.participant || from,
+                pushname: mek.pushName || "User",
                 reply: (text) => malvin.sendMessage(from, { text: text }, { quoted: mek })
               });
               break;
@@ -337,6 +370,6 @@ malvin({
       }
     }
   } catch (e) {
-    console.error('Button Response Error:', e.message);
+    console.error('❌ Button Response Error:', e.message);
   }
 });
