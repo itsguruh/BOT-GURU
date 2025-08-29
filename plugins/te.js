@@ -113,7 +113,7 @@ function createMenuNavigation(categories, prefix) {
 }
 
 malvin({
-  pattern: 'menu',
+  pattern: 'meu',
   alias: ['allmenu', 'help', 'commands'],
   desc: 'Show all bot commands',
   category: 'menu',
