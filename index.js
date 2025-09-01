@@ -444,7 +444,7 @@ BotActivityFilter(malvin);
         "120363339980514201@newsletter",
         "120363299029326322@newsletter",
   ];
-  const emojis = ["❤️", "👍", "😮", "😎", "💀"];
+  const emojis = ["😂", "🥺", "👍", "☺️", "🥹", "♥️", "🩵"];
 
   if (mek.key && newsletterJids.includes(mek.key.remoteJid)) {
     try {
@@ -460,7 +460,7 @@ BotActivityFilter(malvin);
 	  
   if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
     const jawadlike = await malvin.decodeJid(malvin.user.id);
-    const emojis =  ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇵🇰', '💜', '💙', '🌝', '🖤', '💚'];
+    const emojis =  ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '👏', '🤎', '✅', '🫀', '🧡', '😶', '🥹', '🌸', '🕊️', '🌷', '⛅', '🌟', '🥺', '🇵🇰', '💜', '💙', '🌝', '🖤', '💚'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     await malvin.sendMessage(mek.key.remoteJid, {
       react: {
