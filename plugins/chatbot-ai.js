@@ -114,7 +114,7 @@ malvin({
             const query = encodeURIComponent(prompt);
             
             // Use the API endpoint
-            const apiUrl = `https://api.giftedtech.web.id/api/ai/groq-beta?apikey=gifted&q=${query}`;
+            const apiUrl = `https://api.giftedtech.web.id/api/ai/ai?apikey=gifted&q=${query}`;
 
             const { data } = await axios.get(apiUrl);
             
