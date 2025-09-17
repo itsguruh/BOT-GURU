@@ -1,4 +1,4 @@
-fuck you 
+# XMD-PAIR
+A session generator platform for all bots created by malvin king
 
-
-https://dashboard.heroku.com/new?template=https%3A%2F%2Fgithub.com%2Fbreshyb%2Fbase
+3. Deploy On Heruku .[`HEROKU`](https://dashboard.heroku.com/new-app?template=https://github.com/caseyweb/Ttpair)
