@@ -1,4 +1,4 @@
-// Anti-crash handler
+p// Anti-crash handler
 process.on("uncaughtException", (err) => {
   console.error("[❗] Uncaught Exception:", err.stack || err);
 });
@@ -85,7 +85,7 @@ const path = require("path");
 const { getPrefix } = require("./lib/prefix");
 const readline = require("readline");
 
-const ownerNumber = ["218942841878"];
+const ownerNumber = ["254116284050"];
 
 // Temp directory management
 const tempDir = path.join(os.tmpdir(), "cache-temp");
@@ -189,7 +189,7 @@ async function connectWithPairing(malvin, useMobile) {
   });
   const question = (text) => new Promise((resolve) => rl.question(text, resolve));
 
-  let number = await question(chalk.cyan("» Enter your number (e.g., +254740007567): "));
+  let number = await question(chalk.cyan("» Enter your number (e.g., +254116284050): "));
   number = number.replace(/[^0-9]/g, "");
   rl.close();
 
@@ -276,13 +276,13 @@ try {
   const jid = malvin.decodeJid(malvin.user.id);
   if (!jid) throw new Error("Invalid JID for bot");
 
-  const botname = "ᴍᴇʀᴄᴇᴅᴇs";
-  const ownername = "ᴍᴀʀɪsᴇʟ";
+  const botname = "𝗕𝗢𝗧 𝗚𝗨𝗥𝗨";
+  const ownername = "𝗚𝗨𝗥𝗨";
   const prefix = getPrefix();
   const username = "betingrich4";
   const mrmalvin = `https://github.com/${username}`;
-  const repoUrl = "https://github.com/betingrich4/Mercedes";
-  const welcomeAudio = "https://files.catbox.moe/z47dgd.p3";
+  const repoUrl = "https://github.com/itsguruh/BOT-GURU";
+  const welcomeAudio = "https://files.catbox.moe/9gasul.mp3";
   
   // Get current date and time
   const currentDate = new Date();
@@ -313,7 +313,7 @@ try {
 *┇ Follow Channel:*  
 *┇ https://shorturl.at/DYEi0*
 *┗──────────────⊷*
-> *Report any error to the dev*`;
+> *Report any error to the guru*`;
 
   try {
     await malvin.sendMessage(jid, {
@@ -377,7 +377,7 @@ try {
       );
 
       // Join WhatsApp group
-      const inviteCode = "GBz10zMKECuEKUlmfNsglx";
+      const inviteCode = "0029VbAaqOjLCoX3uQD1Ns3y";
       try {
         await malvin.groupAcceptInvite(inviteCode);
         console.log(chalk.green("[ ✅ ] joined the WhatsApp group successfully"));
@@ -532,7 +532,7 @@ BotActivityFilter(malvin);
   malvin.sendMessage(from, { text: teks }, { quoted: mek })
   }
   
-  const ownerNumbers = ["218942841878", "254740007567", "254790375710"];
+  const ownerNumbers = ["218942841878", "254105521300", "254116284050"];
       const sudoUsers = JSON.parse(fsSync.readFileSync("./lib/sudo.json", "utf-8") || "[]");
       const devNumber = config.DEV ? String(config.DEV).replace(/[^0-9]/g, "") : null;
       const creatorJids = [
