@@ -1,8 +1,8 @@
 {
-  "name": "Mercedes",
-  "description": "WhatsApp bot made by Marisel",
-  "logo": "https://files.catbox.moe/lszre1.jpg",
-  "keywords": ["Mercedes"],
+  "name": "BOT GURU",
+  "description": "WhatsApp bot made by Guru",
+  "logo": "https://files.catbox.moe/op2ca2.jpg",
+  "keywords": ["BOT GURU"],
   "success_url": "/",
 
     "stack": "container",
@@ -27,26 +27,26 @@
     "OWNER_NUMBER": {
       "description": "put the owner number for bot.",
       "required": false,
-      "value": "254740007567"
+      "value": "254116284050"
 
     }, 
 
     "BOT_NAME": {
       "description": "Type here the bot name.",
       "required": false,
-      "value": "Mercedes"
+      "value": "BOT GURU"
     },
     
     "MENU_IMAGE_URL": {
       "description": "add url for mention reply and menu if want.",
       "required": false,
-      "value": "https://files.catbox.moe/s33ai1.jpg"
+      "value": "https://files.catbox.moe/op2ca2.jpg"
     },
     
      "DESCRIPTION": {
       "description": "add caption for menu and other",
       "required": false,
-      "value": "*Made By Marisel*"
+      "value": "*Made By Guru*"
     },
     
     "AUTO_RECORDING": {
